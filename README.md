@@ -36,7 +36,9 @@
 
 # TryHackMe-Walkthroughs & Writeups
 
-Tous les writeups que j'ai pu faire sur THM sont regroupés ici. 
+All writeups for the rooms I've completed will be there (hopefully ?).
+All the rooms will not have a writeup, because I started this repository way after completing my first THM room.
+I lost my notes about early rooms along the way, I might have to restart some.
 
 ---
 
