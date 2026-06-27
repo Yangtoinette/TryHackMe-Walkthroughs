@@ -20,8 +20,8 @@
   </tr>
   <tr>
     <td align="center" width="220">
-      <strong>🔥 Streak</strong><br/><br/>
-      <img src="https://img.shields.io/badge/13-days-E8632A?style=for-the-badge" alt="Streak 13 jours"/>
+      <strong>🎖️ Rank</strong><br/><br/>
+      <img src="https://img.shields.io/badge/%5B0xF%5D-%5BTITAN%5D-E8632A?style=for-the-badge" alt="Rank [0xF][TITAN]"/>
     </td>
     <td align="center" width="220">
       <strong>🚪 Completed rooms</strong><br/><br/>
