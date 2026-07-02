@@ -1,0 +1,220 @@
+<!--META
+title: Cache me outside
+platform: TryHackMe
+category: OSINT
+difficulty: Easy
+date: 06 2026
+points: non
+META-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Write-up — Cache me outside</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #010409;
+      font-family: ui-monospace, 'Cascadia Code', 'Fira Code', 'SF Mono', monospace;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+    }
+    .window {
+      max-width: 820px; margin: 0 auto;
+      background: #0d1117; border: 1px solid #30363d; border-radius: 8px; overflow: hidden;
+    }
+    .titlebar {
+      background: #161b22; border-bottom: 1px solid #30363d;
+      padding: 10px 16px; display: flex; align-items: center; gap: 7px;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .dot.r { background: #ff5f57; }
+    .dot.y { background: #ffbd2e; }
+    .dot.g { background: #28c840; }
+    .titlebar-name { font-size: 12px; color: #8b949e; margin-left: 8px; }
+    .body { padding: 22px; color: #c9d1d9; }
+    .challenge-title {
+      font-size: 20px; font-weight: 600; color: #e6edf3;
+      border-left: 2px solid #484f58; padding-left: 12px; margin-bottom: 5px;
+    }
+    .meta {
+      font-size: 12px; color: #8b949e; padding-left: 14px;
+      margin-bottom: 22px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+    }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 600;
+      background: #21262d; color: #8b949e; border: 1px solid #30363d;
+    }
+    .section { margin-bottom: 22px; }
+    .section-label {
+      font-size: 11px; color: #8b949e; text-transform: uppercase;
+      letter-spacing: 0.09em; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: #21262d; }
+    .enonce {
+      background: #161b22; border: 1px solid #30363d;
+      border-left: 2px solid #484f58; border-radius: 0 5px 5px 0;
+      padding: 10px 14px; font-size: 13px; color: #8b949e;
+      line-height: 1.65; font-style: italic;
+    }
+    .tools { display: flex; flex-wrap: wrap; gap: 7px; }
+    .tool {
+      background: #161b22; border: 1px solid #30363d;
+      color: #8b949e; padding: 4px 11px; border-radius: 4px; font-size: 12px;
+    }
+    .steps { display: flex; flex-direction: column; gap: 10px; }
+    .step { background: #161b22; border: 1px solid #21262d; border-radius: 6px; overflow: hidden; }
+    .step-header {
+      background: #0d1117; border-bottom: 1px solid #21262d;
+      padding: 8px 14px; display: flex; align-items: center; gap: 10px;
+    }
+    .step-num  { color: #8b949e; font-size: 11px; font-weight: 600; }
+    .step-title { color: #e6edf3; font-size: 12px; }
+    .step-body { padding: 10px 14px; font-size: 12px; line-height: 1.65; color: #8b949e; }
+    .step-body code {
+      background: #0d1117; border: 1px solid #30363d; border-radius: 3px;
+      padding: 1px 5px; font-size: 11px; color: #c9d1d9;
+    }
+    .result {
+      display: flex; gap: 8px; margin-top: 8px; padding: 6px 10px;
+      background: #0d1117; border-left: 2px solid #484f58;
+      color: #c9d1d9; font-size: 11px; line-height: 1.5;
+    }
+    .result::before { content: '[→]'; font-weight: 600; flex-shrink: 0; color: #8b949e; }
+    .codeblock {
+      background: #010409; border: 1px solid #21262d; border-radius: 4px;
+      padding: 8px 12px; font-size: 11px; color: #c9d1d9;
+      margin-top: 8px; white-space: pre; overflow-x: auto;
+    }
+    .flag-box { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 14px 18px; }
+    .flag-label {
+      font-size: 11px; color: #8b949e; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;
+    }
+    .flag-value { font-size: 14px; color: #e6edf3; font-weight: 600; }
+    @media (max-width: 600px) { body { padding: 1rem 0.5rem; } .body { padding: 16px; } }
+  </style>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+    <span class="titlebar-name">writeup — Cache me outside — TryHackMe</span>
+  </div>
+  <div class="body">
+
+    <div class="challenge-title">Cache me outside</div>
+    <div class="meta">
+      <span>TryHackMe</span>
+      <span>OSINT</span>
+      <span>06 2026</span>
+      <span class="badge">Easy</span>
+    </div>
+
+    <div class="section">
+      <div class="section-label"># énoncé</div>
+      <div class="enonce">"Years after walking away from the scene, a retired hacker has left pieces of his identity scattered across the open internet.
+
+At first glance, it looks like nothing more than a leaked conversation screenshot. But buried in that image is the first thread of a much larger trail. Public profiles, forgotten details, and small mistakes begin to connect into something more deliberate.
+
+Someone wanted this person found.
+
+You are an OSINT investigator tasked with identifying the retired hacker and tracing the clues he left behind.
+
+Start with the conversation screenshot, follow his online presence, connect the exposed details, and use the final evidence to determine where the trail ends."</div>
+    </div>
+
+    <div class="section">
+      <div class="section-label"># outils</div>
+      <div class="tools">
+        <span class="tool">Google</span>
+        <span class="tool">Google Maps</span>
+        <span class="tool">Google Street view</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label"># résolution</div>
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-header">
+            <span class="step-num">[01]</span>
+            <span class="step-title">What is the retired hacker’s full name?</span>
+          </div>
+          <div class="step-body">
+            Dans la photo, on peut voir qu'une des deux personnes parle d'un profil utilisateur sur le site komoot.com. 
+            Une simple navigation sur la page nous permets de trouver la première réponse de ce challenge.
+            <!-- <div class="codeblock">[commande ou sortie outil]</div> -->
+            <div class="result">J** L**</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-header">
+            <span class="step-num">[02]</span>
+            <span class="step-title">What email address did he accidentally expose?</span>
+          </div>
+          <div class="step-body">
+            Nous pouvons voir que sur son profil komoot, un lien de son dépôt github est présent. En le parcourant, on peut voir que le seul fichier présent est le readme.md. 
+            Aucune information intéressante à l'heure actuelle. Recherche dans l'historique de commit au cas où : RAS.
+
+            D'après ce tutoriel : https://alb3rtobr.github.io/posts/how-to-generate-a-patch-from-a-pull-request-in-github/, nous pouvons avoir plus d'informations sur un commit en ajoutant ".patch" à la fin de l'url (surtout utilisé pour voir les données de configuration).
+            Cela nous permet de trouver la réponse à la deuxième question.
+            <div class="result">j*******@*****.c**</div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-header">
+            <span class="step-num">[03]</span>
+            <span class="step-title">What is his phone number?</span>
+          </div>
+          <div class="step-body">
+            Dans un challenge comme celui-ci, les méthodes les plus simples sont parfois les meilleures. Nous avons trouvé l'adresse mail de la personne, nous pouvons lui envoyer un mail. (Dans une situation réelle, cela n'est pas conseillé).
+            La réponse automatique nous fournit le numéro de téléphone.
+            <div class="result">+4X XXX XXX XXX</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-header">
+            <span class="step-num">[04]</span>
+            <span class="step-title">In which city is he located?</span>
+          </div>
+          <div class="step-body">
+            Sans autre informations particulières, nous pouvons revenir sur les informations que nous possédons : un numéro de téléphone, un pseudo de réseau social.
+            
+            L'indicatif téléphonique nous indique un pays en particulier : la R*******.
+            Cela restreint déjà les recherches à effectuer. 
+
+            En cherchant le pseudo "jiml33t" sur les réseaux sociaux, nous tombons sur un profil Threads qui semble correspondre à la personne recherchée.
+
+            Dans une photo, on peut voir un magasin du nom de "irigatii.ro".
+            Une simple recherche Google permet de trouver son adresse, et la ville de Roumanie où est située le magasin.
+            <div class="result">T******</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-header">
+            <span class="step-num">[05]</span>
+            <span class="step-title">Submit the name of the tram station where he got off on the 7th of May, 2026.</span>
+          </div>
+          <div class="step-body">
+            En cherchant des réponses pour la question précédente, nous avons pu voir que la photo trouvée a aussi une légende : et il y est question d'un supermarché français.
+
+            En cherchant aux alentours du magasin sur Google maps, on peut repérer rapidement un Auchan à quelques mètres. 
+            L'arrêt de bus juste devant est la réponse à la dernière question.
+            <div class="result">P**** G******* D*******u</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
